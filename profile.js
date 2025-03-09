@@ -4,9 +4,9 @@ export function Profile() {
             <h1>Adon Dada</h1>
             <p>Follow me:</p>
             <div>
-                <a href="#">Instagram</a>
-                <a href="#">Twitter</a>
-                <a href="#">GitHub</a>
+                <a href="https://instagram.com/ad0nd4da">Instagram</a>
+                <a href="https://discord.gg/5quhSz5z">Discord</a>
+                <a href="https://github.com/adondada">GitHub</a>
             </div>
         </div>
     `;
