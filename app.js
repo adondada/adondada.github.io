@@ -50,7 +50,7 @@ document.addEventListener("DOMContentLoaded", () => {
             consoleContent.appendChild(p);
             consoleContent.scrollTop = consoleContent.scrollHeight;
             index++;
-            setTimeout(addMessage, 600);
+            setTimeout(addMessage, 300);
         } else {
             setTimeout(() => {
                 root.innerHTML = Profile();
