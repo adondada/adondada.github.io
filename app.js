@@ -10,9 +10,11 @@ document.addEventListener("DOMContentLoaded", () => {
     
     function getTimestamp() {
         const now = new Date();
-        const diff = now - startTime;
-        const date = new Date(diff);
-        return `[${date.toISOString().substr(11, 8)}]`;
+        const elapsed = Math.floor((now - startTime) / 1000);
+        const hours = String(Math.floor(elapsed / 3600)).padStart(2, '0');
+        const minutes = String(Math.floor((elapsed % 3600) / 60)).padStart(2, '0');
+        const seconds = String(elapsed % 60).padStart(2, '0');
+        return `[${hours}:${minutes}:${seconds}]`;
     }
     
     const logMessages = [
