@@ -86,3 +86,18 @@ body {
 .profile a:hover {
     text-shadow: 0 0 15px #00ff00;
 }
+
+@media only screen and (max-width: 768px) {
+    .debug-console {
+      width: 90%;
+      height: 80vh;
+      margin: 10px auto;
+    }
+    .console-content {
+      font-size: 14px;
+    }
+    .snowflake {
+      width: 3px;
+      height: 3px;
+    }
+  }
