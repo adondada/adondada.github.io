@@ -5,16 +5,28 @@ document.addEventListener("DOMContentLoaded", () => {
     const root = document.getElementById("root");
     root.innerHTML = DebugConsole();
     
-    const messages = [
-        "[10:39:50 PM] Booting system...",
-        "[10:39:50 PM] Checking protocols...",
-        "[10:39:50 PM] Establishing secure connection...",
-        "[10:39:51 PM] Running diagnostics...",
-        "[10:39:51 PM] Loading user profile...",
-        "[10:39:52 PM] Initializing UI...",
-        "[10:39:53 PM] Welcome, Adon Dada!"
+    const messages = [];
+    const startTime = new Date();
+    
+    function getTimestamp() {
+        const now = new Date();
+        const diff = now - startTime;
+        const date = new Date(diff);
+        return `[${date.toISOString().substr(11, 8)}]`;
+    }
+    
+    const logMessages = [
+        "Booting system...",
+        "Checking protocols...",
+        "Establishing secure connection...",
+        "Running diagnostics...",
+        "Loading user profile...",
+        "Initializing UI...",
+        "Welcome, Adon Dada!"
     ];
-
+    
+    logMessages.forEach(msg => messages.push(`${getTimestamp()} ${msg}`));
+    
     const consoleContent = document.getElementById("console-content");
     let index = 0;
 
