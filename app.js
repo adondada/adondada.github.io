@@ -7,8 +7,10 @@ document.addEventListener("DOMContentLoaded", () => {
     
     const messages = [];
     const startTime = new Date();
+
+
     
-    function getTimestamp() {
+/*    function getTimestamp() {
         const now = new Date();
         const elapsed = Math.floor((now - startTime) / 1000);
         const hours = String(Math.floor(elapsed / 3600)).padStart(2, '0');
@@ -16,7 +18,16 @@ document.addEventListener("DOMContentLoaded", () => {
         const seconds = String(elapsed % 60).padStart(2, '0');
         return `[${hours}:${minutes}:${seconds}]`;
     }
-    
+
+    MY CODE AAAAAAAARGGGGGGGG:
+  */
+
+
+  function getTimestamp() {
+    const time = new Date().toLocaleTimeString();
+    return `[${time}]`;
+ }
+
     const logMessages = [
         "Booting system...",
         "Checking protocols...",
