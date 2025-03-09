@@ -4,6 +4,12 @@ import { Profile } from "./profile.js";
 document.addEventListener("DOMContentLoaded", () => {
     const root = document.getElementById("root");
     root.innerHTML = DebugConsole();
+    
+    // Animate debug console
+    setTimeout(() => {
+        document.getElementById("console").classList.add("show-console");
+    }, 500);
+    
     setTimeout(() => {
         root.innerHTML = Profile();
     }, 4000);
@@ -17,8 +23,8 @@ document.addEventListener("DOMContentLoaded", () => {
         document.body.appendChild(snowflake);
     }
 
-    // Add blue pattern overlay
-    let pattern = document.createElement("div");
-    pattern.className = "pattern-overlay";
-    document.body.appendChild(pattern);
+    // Add paint-like pattern overlay
+    let paintPattern = document.createElement("div");
+    paintPattern.className = "paint-pattern";
+    document.body.appendChild(paintPattern);
 });
