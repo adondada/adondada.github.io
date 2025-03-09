@@ -1,11 +1,14 @@
 export function DebugConsole() {
     return `
         <div class="debug-console" id="console">
-            <p>> Initializing...</p>
-            <p>> Loading assets...</p>
-            <p>> Connecting to server...</p>
-            <p>> Almost done...</p>
-            <p>> Welcome, Adon Dada!</p>
+            <div class="console-content">
+                <p>> Booting system...</p>
+                <p>> Checking protocols...</p>
+                <p>> Establishing secure connection...</p>
+                <p>> Running diagnostics...</p>
+                <p>> Loading user profile...</p>
+                <p>> Welcome, Adon Dada!</p>
+            </div>
         </div>
     `;
 }
