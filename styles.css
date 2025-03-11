@@ -87,6 +87,20 @@ body {
     text-shadow: 0 0 15px #00ff00;
 }
 
+#counter {
+  position: fixed;
+  bottom: 5%; /* Use percentage to position it up from the bottom */
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 15px 25px;
+  border-radius: 15px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  font-size: 16px;
+  z-index: 100;
+}
+
 @media only screen and (max-width: 768px) {
     .debug-console {
       width: 85%;
