@@ -1,46 +1,44 @@
 // =============================================
-// EDIT YOUR SKILLS HERE - Just modify this array!
+// Skills
 // =============================================
 var skills = [
     { name: "JavaScript", level: 90, icon: "⚡" },
     { name: "Python", level: 85, icon: "🐍" },
     { name: "HTML / CSS", level: 95, icon: "🎨" },
     { name: "Node.js", level: 80, icon: "🚀" },
-    { name: "React", level: 75, icon: "⚛️" },
+    { name: "C", level: 45, icon: "⚛️" },
     { name: "Git", level: 85, icon: "📦" },
     { name: "TypeScript", level: 70, icon: "📘" },
     { name: "SQL", level: 75, icon: "🗃️" },
 ];
 
-// =============================================
-// EDIT YOUR PROJECTS HERE
-// =============================================
+
 var projects = [
     {
         title: "invisib.app",
         url: "https://invisib.app",
         icon: "🔐",
-        description: "Privacy-first application that keeps your digital footprint invisible. Secure, encrypted, and designed for everyday use."
+        description: "Privacy-first spatial AI workspace"
     },
     {
         title: "invisib.xyz",
         url: "https://invisib.xyz",
         icon: "🌐",
-        description: "The main hub for Invisib services. Learn about our mission and explore our privacy-focused ecosystem."
+        description: "file uploader (currently down)"
     }
 ];
 
 // =============================================
-// EDIT YOUR MUSIC HERE - Easy to customize!
+// MUSIC
 // =============================================
 var music = {
     title: "2019",
     artist: "ATC Nico",
-    cover: "2019.jpg",      // Put your cover image in the same folder
-    file: "2019.mp3"        // Put your MP3 file in the same folder
+    cover: "2019.jpg",      
+    file: "2019.mp3"        
 };
 
-// Section names for indicators
+// section names
 var sectionNames = ['hero', 'skills', 'company', 'projects'];
 
 function Profile() {
@@ -67,12 +65,12 @@ function Profile() {
             '</a>';
     }).join('');
 
-    // Section indicator dots
+    // dots
     var indicatorsHTML = sectionNames.map(function (name, index) {
         return '<button class="indicator-dot' + (index === 0 ? ' active' : '') + '" data-section="' + name + '" title="' + name.charAt(0).toUpperCase() + name.slice(1) + '"></button>';
     }).join('');
 
-    // Music player HTML
+    // music playr HTML
     var musicPlayerHTML = '' +
         '<div class="music-player" id="music-player">' +
         '<div class="player-cover">' +
