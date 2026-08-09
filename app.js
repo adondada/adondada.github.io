@@ -154,7 +154,7 @@ function renderRepos(repos) {
     ].filter(Boolean).join("");
 
     return `
-      <a class="repo-row${repo.fork ? " is-fork" : "}" href="${repo.html_url}" target="_blank" rel="noreferrer">
+      <a class="repo-row${repo.fork ? " is-fork" : ""}" href="${repo.html_url}" target="_blank" rel="noreferrer">
         <div>
           <h3>${escapeHtml(repo.name)}</h3>
           <p>${description}</p>
