@@ -1,318 +1,175 @@
-document.addEventListener("DOMContentLoaded", function () {
-    var root = document.getElementById("root");
+document.addEventListener("DOMContentLoaded", () => {
+  const root = document.getElementById("root");
+  root.innerHTML = DebugConsole() + Profile();
 
-    // Render terminal overlay and profile together
-    root.innerHTML = DebugConsole() + Profile();
+  const terminal = document.getElementById("terminal-overlay");
+  const terminalBody = document.getElementById("terminal-body");
+  const launchButton = document.getElementById("terminal-launch-btn");
+  const clickHint = document.getElementById("click-indicator");
 
-    var terminalBody = document.getElementById("terminal-body");
-    var terminalOverlay = document.getElementById("terminal-overlay");
-    var mainContent = document.getElementById("main-content");
-    var nav = document.getElementById("nav");
-    var indicators = document.getElementById("indicators");
-    var launchBtn = document.getElementById("terminal-launch-btn");
-    var commands = getTerminalCommands();
-    var userInteracted = false;
+  let introIndex = 0;
 
-    var lineIndex = 0;
+  function terminalLine(item) {
+    const line = document.createElement("div");
+    line.className = "terminal-line";
 
-    // Type out terminal lines with realistic timing
-    function typeTerminalLine() {
-        if (lineIndex < commands.length) {
-            var cmd = commands[lineIndex];
-
-            // If we hit a 'wait' command, show the launch button and stop
-            if (cmd.type === 'wait') {
-                if (launchBtn) {
-                    launchBtn.classList.add("visible");
-                    var clickIndicator = document.getElementById("click-indicator");
-                    if (clickIndicator) clickIndicator.classList.add("visible");
-                }
-                return; // Stop here and wait for user click
-            }
-
-            var lineEl = document.createElement("div");
-            lineEl.className = "terminal-line";
-
-            if (cmd.type === 'command') {
-                lineEl.innerHTML =
-                    '<span class="terminal-prompt">' + cmd.prompt + '</span>' +
-                    '<span class="terminal-path">:' + cmd.path + '$</span>' +
-                    '<span class="terminal-command"> ' + cmd.text + '</span>';
-            } else if (cmd.type === 'success') {
-                lineEl.innerHTML = '<span class="terminal-success">' + cmd.text + '</span>';
-            } else if (cmd.type === 'warning') {
-                lineEl.innerHTML = '<span class="terminal-warning">' + cmd.text + '</span>';
-            } else if (cmd.type === 'error') {
-                lineEl.innerHTML = '<span class="terminal-error">' + cmd.text + '</span>';
-            } else if (cmd.type === 'ascii') {
-                lineEl.innerHTML = '<span class="terminal-ascii">' + cmd.text + '</span>';
-            } else if (cmd.type === 'file') {
-                lineEl.innerHTML = '<span class="terminal-file">' + cmd.text + '</span>';
-            } else if (cmd.type === 'dir') {
-                lineEl.innerHTML = '<span class="terminal-output">' + cmd.text + '</span>';
-            } else if (cmd.type === 'info') {
-                lineEl.innerHTML = '<span class="terminal-info">' + cmd.text + '</span>';
-            } else if (cmd.type === 'neo') {
-                lineEl.innerHTML = cmd.text;
-                lineEl.style.whiteSpace = 'pre';
-            } else {
-                lineEl.innerHTML = '<span class="terminal-output">' + cmd.text + '</span>';
-            }
-
-            terminalBody.appendChild(lineEl);
-
-            requestAnimationFrame(function () {
-                lineEl.classList.add("visible");
-            });
-
-            terminalBody.scrollTop = terminalBody.scrollHeight;
-            lineIndex++;
-
-            // Variable timing for realism
-            var delay = 60;
-            if (cmd.type === 'command') delay = 400;
-            if (cmd.type === 'ascii') delay = 40;
-            if (cmd.text === '') delay = 100;
-            if (cmd.type === 'warning') delay = 500;
-            if (cmd.type === 'success' && cmd.text.includes('Welcome')) delay = 300;
-
-            setTimeout(typeTerminalLine, delay);
-        } else {
-            finishTerminal();
-        }
+    if (item.type === "command") {
+      line.innerHTML = `<span class="terminal-prompt">${item.prompt}</span><span class="terminal-path">:${item.path}$</span><span class="terminal-command"> ${item.text}</span>`;
+    } else if (item.type === "success") {
+      line.innerHTML = `<span class="terminal-success">${item.text}</span>`;
+    } else if (item.type === "warning") {
+      line.innerHTML = `<span class="terminal-warning">${item.text}</span>`;
+    } else if (item.type === "error") {
+      line.innerHTML = `<span class="terminal-error">${item.text}</span>`;
+    } else if (item.type === "neo") {
+      line.innerHTML = item.text;
+      line.style.whiteSpace = "pre";
+    } else {
+      line.innerHTML = `<span class="terminal-output">${item.text || ""}</span>`;
     }
 
-    // Continue with launch commands after user clicks
-    function runLaunchSequence() {
-        var launchCommands = getLaunchCommands();
-        var launchIndex = 0;
+    terminalBody.appendChild(line);
+    requestAnimationFrame(() => line.classList.add("visible"));
+    terminalBody.scrollTop = terminalBody.scrollHeight;
+  }
 
-        function typeLaunchLine() {
-            if (launchIndex < launchCommands.length) {
-                var cmd = launchCommands[launchIndex];
-                var lineEl = document.createElement("div");
-                lineEl.className = "terminal-line";
+  function nextIntroLine() {
+    const commands = getTerminalCommands();
+    const item = commands[introIndex];
 
-                if (cmd.type === 'success') {
-                    lineEl.innerHTML = '<span class="terminal-success">' + cmd.text + '</span>';
-                } else if (cmd.type === 'warning') {
-                    lineEl.innerHTML = '<span class="terminal-warning">' + cmd.text + '</span>';
-                } else {
-                    lineEl.innerHTML = '<span class="terminal-output">' + cmd.text + '</span>';
-                }
+    if (!item) return;
 
-                terminalBody.appendChild(lineEl);
-
-                requestAnimationFrame(function () {
-                    lineEl.classList.add("visible");
-                });
-
-                terminalBody.scrollTop = terminalBody.scrollHeight;
-                launchIndex++;
-
-                var delay = 60;
-                if (cmd.type === 'warning') delay = 400;
-                if (cmd.type === 'success' && cmd.text.includes('Welcome')) delay = 300;
-
-                setTimeout(typeLaunchLine, delay);
-            } else {
-                finishTerminal();
-            }
-        }
-
-        typeLaunchLine();
+    if (item.type === "wait") {
+      launchButton.classList.add("visible");
+      clickHint.classList.add("visible");
+      return;
     }
 
-    // Finish terminal and show main content
-    function finishTerminal() {
-        var cursorLine = document.createElement("div");
-        cursorLine.className = "terminal-line visible";
-        cursorLine.innerHTML =
-            '<span class="terminal-prompt">adondada@arch</span>' +
-            '<span class="terminal-path">:~/portfolio$</span>' +
-            '<span class="cursor"></span>';
-        terminalBody.appendChild(cursorLine);
+    terminalLine(item);
+    introIndex += 1;
 
-        setTimeout(function () {
-            terminalOverlay.classList.add("hidden");
-            mainContent.classList.add("visible");
-            if (nav) nav.classList.add("visible");
-            if (indicators) indicators.classList.add("visible");
-            initScrollAnimations();
-            initSectionIndicators();
-            initMusicPlayer(userInteracted);
-            createStars();
-        }, 800);
+    let delay = 60;
+    if (item.type === "command") delay = 400;
+    if (item.type === "neo") delay = 40;
+    if (!item.text) delay = 100;
+
+    setTimeout(nextIntroLine, delay);
+  }
+
+  function finishIntro() {
+    terminalLine({
+      type: "neo",
+      text: '<span class="terminal-prompt">adondada@arch</span><span class="terminal-path">:~/portfolio$</span><span class="cursor"></span>'
+    });
+
+    setTimeout(() => {
+      terminal.classList.add("hidden");
+      document.body.classList.add("portfolio-ready");
+      initPortfolio();
+    }, 650);
+  }
+
+  function runLaunchSequence() {
+    launchButton.classList.remove("visible");
+    clickHint.classList.remove("visible");
+
+    const commands = getLaunchCommands();
+    let index = 0;
+
+    function next() {
+      if (index >= commands.length) {
+        finishIntro();
+        return;
+      }
+
+      terminalLine(commands[index]);
+      index += 1;
+      setTimeout(next, 90);
     }
 
-    // Launch button click handler
-    if (launchBtn) {
-        launchBtn.addEventListener("click", function () {
-            userInteracted = true; // User has interacted!
-            launchBtn.classList.remove("visible");
-            launchBtn.style.display = "none";
+    next();
+  }
 
-            var clickIndicator = document.getElementById("click-indicator");
-            if (clickIndicator) {
-                clickIndicator.classList.remove("visible");
-                clickIndicator.style.display = "none";
-            }
-
-            runLaunchSequence();
-        });
-    }
-
-    setTimeout(typeTerminalLine, 400);
-
-    function createStars() {
-        var starsContainer = document.getElementById("stars");
-        if (!starsContainer) return;
-
-        for (var i = 0; i < 80; i++) {
-            var star = document.createElement("div");
-            star.className = "star";
-            star.style.left = Math.random() * 100 + "%";
-            star.style.top = Math.random() * 100 + "%";
-            star.style.animationDelay = Math.random() * 3 + "s";
-            var size = Math.random() * 2 + 1 + "px";
-            star.style.width = size;
-            star.style.height = size;
-            starsContainer.appendChild(star);
-        }
-    }
-
-    function initScrollAnimations() {
-        var revealElements = document.querySelectorAll(".reveal");
-
-        var observer = new IntersectionObserver(function (entries) {
-            entries.forEach(function (entry) {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add("active");
-
-                    var skillBars = entry.target.querySelectorAll(".skill-progress");
-                    skillBars.forEach(function (bar) {
-                        var level = bar.getAttribute("data-level");
-                        bar.style.width = level + "%";
-                    });
-
-                    if (entry.target.classList.contains("skill-item")) {
-                        var bar = entry.target.querySelector(".skill-progress");
-                        if (bar) {
-                            var level = bar.getAttribute("data-level");
-                            setTimeout(function () {
-                                bar.style.width = level + "%";
-                            }, 300);
-                        }
-                    }
-                }
-            });
-        }, {
-            threshold: 0.1,
-            rootMargin: "0px 0px -30px 0px"
-        });
-
-        revealElements.forEach(function (el) {
-            observer.observe(el);
-        });
-    }
-
-    // Section indicators logic
-    function initSectionIndicators() {
-        var container = document.getElementById("main-content");
-        var sections = document.querySelectorAll(".snap-section");
-        var dots = document.querySelectorAll(".indicator-dot");
-
-        // Click handlers for dots
-        dots.forEach(function (dot) {
-            dot.addEventListener("click", function () {
-                var sectionId = dot.getAttribute("data-section");
-                var target = document.getElementById(sectionId);
-                if (target) {
-                    target.scrollIntoView({ behavior: "smooth" });
-                }
-            });
-        });
-
-        // Update active dot on scroll
-        var sectionObserver = new IntersectionObserver(function (entries) {
-            entries.forEach(function (entry) {
-                if (entry.isIntersecting) {
-                    var sectionId = entry.target.id;
-                    dots.forEach(function (dot) {
-                        if (dot.getAttribute("data-section") === sectionId) {
-                            dot.classList.add("active");
-                        } else {
-                            dot.classList.remove("active");
-                        }
-                    });
-                }
-            });
-        }, {
-            root: container,
-            threshold: 0.5
-        });
-
-        sections.forEach(function (section) {
-            sectionObserver.observe(section);
-        });
-    }
-
-    // Music player functionality
-    function initMusicPlayer(autoplay) {
-        var player = document.getElementById("music-player");
-        var audio = document.getElementById("audio-player");
-        var playBtn = document.getElementById("play-btn");
-        var progressBar = document.getElementById("progress-bar");
-        var playIcon = playBtn ? playBtn.querySelector(".play-icon") : null;
-        var pauseIcon = playBtn ? playBtn.querySelector(".pause-icon") : null;
-
-        if (!player || !audio || !playBtn) return;
-
-        // Show player with animation
-        setTimeout(function () {
-            player.classList.add("visible");
-
-            // Autoplay if user interacted
-            if (autoplay) {
-                audio.play().then(function () {
-                    player.classList.add("playing");
-                    if (playIcon) playIcon.style.display = "none";
-                    if (pauseIcon) pauseIcon.style.display = "inline";
-                }).catch(function (err) {
-                    console.log("Autoplay failed:", err);
-                });
-            }
-        }, 500);
-
-        // Play/Pause toggle
-        playBtn.addEventListener("click", function () {
-            if (audio.paused) {
-                audio.play();
-                player.classList.add("playing");
-                if (playIcon) playIcon.style.display = "none";
-                if (pauseIcon) pauseIcon.style.display = "inline";
-            } else {
-                audio.pause();
-                player.classList.remove("playing");
-                if (playIcon) playIcon.style.display = "inline";
-                if (pauseIcon) pauseIcon.style.display = "none";
-            }
-        });
-
-        // Update progress bar
-        audio.addEventListener("timeupdate", function () {
-            if (audio.duration) {
-                var percent = (audio.currentTime / audio.duration) * 100;
-                progressBar.style.width = percent + "%";
-            }
-        });
-
-        // Reset when song ends
-        audio.addEventListener("ended", function () {
-            player.classList.remove("playing");
-            if (playIcon) playIcon.style.display = "inline";
-            if (pauseIcon) pauseIcon.style.display = "none";
-            progressBar.style.width = "0%";
-        });
-    }
+  launchButton.addEventListener("click", runLaunchSequence);
+  setTimeout(nextIntroLine, 400);
 });
+
+function initPortfolio() {
+  renderRepos(fallbackRepos);
+  refreshRepos();
+  watchHeader();
+}
+
+function watchHeader() {
+  const header = document.getElementById("site-header");
+
+  const update = () => {
+    header.classList.toggle("scrolled", window.scrollY > 24);
+  };
+
+  update();
+  window.addEventListener("scroll", update, { passive: true });
+}
+
+async function refreshRepos() {
+  const status = document.getElementById("repo-status");
+
+  try {
+    const response = await fetch("https://api.github.com/users/adondada/repos?per_page=100&sort=updated", {
+      headers: { Accept: "application/vnd.github+json" }
+    });
+
+    if (!response.ok) throw new Error(`GitHub returned ${response.status}`);
+
+    const repos = await response.json();
+    renderRepos(repos);
+    status.textContent = `${repos.length} public repos, pulled live from GitHub.`;
+  } catch (error) {
+    console.warn("Could not refresh repositories:", error);
+    status.textContent = "Showing the last saved public repo list. GitHub did not answer this time.";
+  }
+}
+
+function renderRepos(repos) {
+  const list = document.getElementById("repo-list");
+  if (!list) return;
+
+  const sorted = [...repos].sort((a, b) => {
+    if (a.fork !== b.fork) return Number(a.fork) - Number(b.fork);
+    return a.name.localeCompare(b.name);
+  });
+
+  list.innerHTML = sorted.map(repo => {
+    const description = repo.description
+      ? escapeHtml(repo.description)
+      : repo.fork
+        ? "Forked repository."
+        : "No description written yet.";
+
+    const badges = [
+      repo.language ? `<span>${escapeHtml(repo.language)}</span>` : "",
+      repo.fork ? "<span>fork</span>" : "",
+      repo.archived ? "<span>archived</span>" : "",
+      repo.stargazers_count ? `<span>★ ${repo.stargazers_count}</span>` : ""
+    ].filter(Boolean).join("");
+
+    return `
+      <a class="repo-row${repo.fork ? " is-fork" : "}" href="${repo.html_url}" target="_blank" rel="noreferrer">
+        <div>
+          <h3>${escapeHtml(repo.name)}</h3>
+          <p>${description}</p>
+        </div>
+        <div class="repo-meta">${badges}<strong>↗</strong></div>
+      </a>
+    `;
+  }).join("");
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
