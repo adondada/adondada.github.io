@@ -1,212 +1,169 @@
-// =============================================
-// Skills
-// =============================================
-var skills = [
-    { name: "JavaScript", level: 90, icon: "⚡" },
-    { name: "Python", level: 85, icon: "🐍" },
-    { name: "HTML / CSS", level: 95, icon: "🎨" },
-    { name: "Node.js", level: 80, icon: "🚀" },
-    { name: "C", level: 45, icon: "⚛️" },
-    { name: "Git", level: 85, icon: "📦" },
-    { name: "TypeScript", level: 70, icon: "📘" },
-    { name: "SQL", level: 75, icon: "🗃️" },
+const featuredProjects = [
+  {
+    name: "pwnagotchi-flipper-companion",
+    repo: "https://github.com/adondada/pwnagotchi-flipper-companion",
+    stack: "C · Python · BLE",
+    text: "A Flipper Zero companion for Pwnagotchi. It shows live status, discovers installed plugins, edits their settings and handles system actions over BLE."
+  },
+  {
+    name: "pwnagotchi-car-mode",
+    repo: "https://github.com/adondada/pwnagotchi-car-mode",
+    stack: "Python · Pwnagotchi · BlueZ",
+    text: "A movement-aware Pwnagotchi mode that combines Wi-Fi changes with optional BLE and GPS signals, plus a Web UI for tuning it without living in config files."
+  },
+  {
+    name: "pwnagotchi-display-manager",
+    repo: "https://github.com/adondada/pwnagotchi-display-manager",
+    stack: "Python · Web UI",
+    text: "A small control panel for display plugins: find UI elements, move them around, toggle plugins and save positions without editing somebody else's plugin source."
+  },
+  {
+    name: "fixwitness",
+    repo: "https://github.com/adondada/fixwitness",
+    stack: "Python · Git · Testing",
+    text: "A developer tool that checks whether a regression test actually catches the bug a patch claims to fix. Because a green test suite can still be lying to you."
+  },
+  {
+    name: "pythonas-gr",
+    repo: "https://github.com/adondada/pythonas-gr",
+    stack: "Python · Language tooling",
+    text: "Python with a Greek API and optional Greek-style syntax. Mostly an experiment in how far you can push a language before your editor starts judging you."
+  },
+  {
+    name: "codexharbor",
+    repo: "https://github.com/adondada/codexharbor",
+    stack: "TypeScript · Electron · SSH",
+    text: "A desktop client for running and managing Codex on a remote Linux machine over direct SSH instead of babysitting another terminal window."
+  }
 ];
 
+const fallbackRepos = [
+  ["pwnagotchi-store", "HTML", true],
+  ["pwnagotchi-flipper-companion", "C", false],
+  ["pwnagotchi-car-mode", "Python", false],
+  ["-pwnagotchi-flipper-companion", "", false],
+  ["pwnagotchi-display-manager", "Python", false],
+  ["fixwitness", "Python", false],
+  ["pythonas-gr", "Python", false],
+  ["-", "", false],
+  ["aios", "Python", false],
+  ["codexharbor", "TypeScript", false],
+  ["testakisthc.github.io", "HTML", false],
+  ["adondada.github.io", "CSS", false],
+  ["EeveeSpotifyReborn", "", true],
+  ["adondada", "", false],
+  ["Pihole-display", "Python", false],
+  ["wifi_dash", "Python", false],
+  ["invisib.chat.github.io", "HTML", false],
+  ["invisib", "HTML", false],
+  ["geomeet", "", false],
+  ["airify", "", false],
+  ["joyeuse", "", true],
+  ["hackeruniongr", "", false]
+].map(([name, language, fork]) => ({
+  name,
+  language: language || null,
+  fork,
+  html_url: `https://github.com/adondada/${name}`,
+  description: null,
+  stargazers_count: 0,
+  archived: false
+}));
 
-var projects = [
-    {
-        title: "invisib.app",
-        url: "https://invisib.app",
-        icon: "🔐",
-        description: "Privacy-first spatial AI workspace"
-    },
-    {
-        title: "invisib.xyz",
-        url: "https://invisib.xyz",
-        icon: "🌐",
-        description: "file uploader (currently down)"
-    }
-];
-
-// =============================================
-// MUSIC
-// =============================================
-var music = {
-    title: "2019",
-    artist: "ATC Nico",
-    cover: "2019.jpg",      
-    file: "2019.mp3"        
-};
-
-// section names
-var sectionNames = ['hero', 'skills', 'company', 'projects'];
+function featuredProjectCards() {
+  return featuredProjects.map(project => `
+    <a class="project-card" href="${project.repo}" target="_blank" rel="noreferrer">
+      <div class="project-card-top">
+        <span class="repo-mark">↗</span>
+        <span class="project-stack">${project.stack}</span>
+      </div>
+      <h3>${project.name}</h3>
+      <p>${project.text}</p>
+    </a>
+  `).join("");
+}
 
 function Profile() {
-    var skillsHTML = skills.map(function (skill, index) {
-        return '<div class="skill-item reveal reveal-delay-' + ((index % 4) + 1) + '">' +
-            '<div class="skill-header">' +
-            '<span class="skill-name">' + skill.icon + ' ' + skill.name + '</span>' +
-            '<span class="skill-percent">' + skill.level + '%</span>' +
-            '</div>' +
-            '<div class="skill-bar">' +
-            '<div class="skill-progress" data-level="' + skill.level + '"></div>' +
-            '</div>' +
-            '</div>';
-    }).join('');
+  return `
+    <header class="site-header" id="site-header">
+      <a class="wordmark" href="#top">adondada</a>
+      <nav aria-label="Primary navigation">
+        <a href="#work">work</a>
+        <a href="#about">about</a>
+        <a href="#all-projects">all repos</a>
+        <a href="https://github.com/adondada" target="_blank" rel="noreferrer">github ↗</a>
+      </nav>
+    </header>
 
-    var projectsHTML = projects.map(function (project, index) {
-        return '<a href="' + project.url + '" target="_blank" rel="noopener noreferrer" class="project-card reveal reveal-delay-' + (index + 1) + '">' +
-            '<div class="project-image">' + project.icon + '</div>' +
-            '<div class="project-content">' +
-            '<h3 class="project-title">' + project.title + '</h3>' +
-            '<p class="project-description">' + project.description + '</p>' +
-            '<span class="project-link">Visit Site →</span>' +
-            '</div>' +
-            '</a>';
-    }).join('');
+    <main class="site-main" id="main-content">
+      <section class="hero section" id="top">
+        <p class="eyebrow">developer · builder · occasional hardware menace</p>
+        <h1>I make software for problems I keep running into.</h1>
+        <p class="hero-copy">
+          I’m <strong>adondada</strong>. Most of my repos start the same way: I need a tool,
+          the existing option annoys me, and suddenly it is 3 a.m. and there is a new project.
+        </p>
+        <div class="hero-links">
+          <a class="button primary" href="#work">see what I build</a>
+          <a class="button" href="https://github.com/adondada" target="_blank" rel="noreferrer">github profile ↗</a>
+        </div>
+        <p class="tiny-note">No skill bars. I refuse to claim I’m 87% JavaScript.</p>
+      </section>
 
-    // dots
-    var indicatorsHTML = sectionNames.map(function (name, index) {
-        return '<button class="indicator-dot' + (index === 0 ? ' active' : '') + '" data-section="' + name + '" title="' + name.charAt(0).toUpperCase() + name.slice(1) + '"></button>';
-    }).join('');
+      <section class="section" id="work">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">selected work</p>
+            <h2>Things I’m actually excited to show.</h2>
+          </div>
+          <p>Mostly developer tools, Pwnagotchi experiments, small utilities and whatever rabbit hole won that week.</p>
+        </div>
+        <div class="featured-grid">
+          ${featuredProjectCards()}
+        </div>
+      </section>
 
-    // music playr HTML
-    var musicPlayerHTML = '' +
-        '<div class="music-player" id="music-player">' +
-        '<div class="player-cover">' +
-        '<img src="' + music.cover + '" alt="Album Cover" onerror="this.src=\'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect fill=%22%231a1a24%22 width=%22100%22 height=%22100%22/><text x=%2250%22 y=%2255%22 text-anchor=%22middle%22 fill=%22%2300ff88%22 font-size=%2240%22>♪</text></svg>\'">' +
-        '<div class="player-vinyl"></div>' +
-        '</div>' +
-        '<div class="player-info">' +
-        '<div class="player-title">' + music.title + '</div>' +
-        '<div class="player-artist">' + music.artist + '</div>' +
-        '</div>' +
-        '<div class="player-controls">' +
-        '<button class="player-btn" id="play-btn">' +
-        '<span class="play-icon">▶</span>' +
-        '<span class="pause-icon" style="display:none;">❚❚</span>' +
-        '</button>' +
-        '</div>' +
-        '<div class="player-progress">' +
-        '<div class="progress-bar" id="progress-bar"></div>' +
-        '</div>' +
-        '<audio id="audio-player" src="' + music.file + '"></audio>' +
-        '</div>';
+      <section class="section about" id="about">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">about</p>
+            <h2>I like useful software more than impressive-sounding software.</h2>
+          </div>
+        </div>
+        <div class="about-grid">
+          <p>
+            I bounce between Python, JavaScript/TypeScript, C, Linux, networking and little hardware projects.
+            I care about understanding how things work underneath the UI, then making the annoying parts easier to use.
+          </p>
+          <p>
+            Some projects are polished, some are experiments, and some are evidence that curiosity has poor time-management skills.
+            The public repos below are the honest version, not a fake “only my three perfect projects exist” portfolio.
+          </p>
+        </div>
+        <div class="tool-row" aria-label="Tools and technologies">
+          <span>Python</span><span>JavaScript</span><span>TypeScript</span><span>C</span><span>Linux</span>
+          <span>Git</span><span>Networking</span><span>Raspberry Pi</span><span>Flipper Zero</span>
+        </div>
+      </section>
 
-    return '' +
-        '<div class="stars-container" id="stars"></div>' +
+      <section class="section" id="all-projects">
+        <div class="section-heading repo-heading">
+          <div>
+            <p class="eyebrow">github dump</p>
+            <h2>All public repositories.</h2>
+          </div>
+          <p id="repo-status">Loading the current list from GitHub…</p>
+        </div>
+        <div class="repo-list" id="repo-list" aria-live="polite"></div>
+      </section>
 
-        '<!-- Music Player -->' +
-        musicPlayerHTML +
-
-        '<!-- Navigation Menu -->' +
-        '<nav class="nav" id="nav">' +
-        '<a href="#skills">Skills</a>' +
-        '<a href="#company">Invisib</a>' +
-        '<a href="#projects">Projects</a>' +
-        '</nav>' +
-
-        '<!-- Section Indicators -->' +
-        '<div class="section-indicators" id="indicators">' +
-        indicatorsHTML +
-        '</div>' +
-
-        '<main class="main-content snap-container" id="main-content">' +
-        '<!-- Hero Section -->' +
-        '<section class="snap-section hero" id="hero">' +
-        '<div class="container">' +
-        '<h1 class="reveal">Adon Dada</h1>' +
-        '<p class="subtitle reveal reveal-delay-1">Developer & Privacy Advocate</p>' +
-        '<div class="social-links reveal reveal-delay-2">' +
-        '<a href="https://instagram.com/ad0nd4da" target="_blank" rel="noopener noreferrer" class="social-link">' +
-        '📸 Instagram' +
-        '</a>' +
-        '<a href="https://discord.gg/5quhSz5z" target="_blank" rel="noopener noreferrer" class="social-link">' +
-        '💬 Discord' +
-        '</a>' +
-        '<a href="https://github.com/adondada" target="_blank" rel="noopener noreferrer" class="social-link">' +
-        '🐙 GitHub' +
-        '</a>' +
-        '</div>' +
-        '</div>' +
-        '<div class="scroll-hint" id="scroll-hint">' +
-        '<div class="scroll-mouse"></div>' +
-        '<div class="scroll-arrows">' +
-        '<span></span>' +
-        '<span></span>' +
-        '</div>' +
-        '<span>Scroll to explore</span>' +
-        '</div>' +
-        '</section>' +
-
-        '<!-- Skills Section -->' +
-        '<section class="snap-section skills" id="skills">' +
-        '<div class="container">' +
-        '<h2 class="section-title reveal"><span>Skills</span> & Technologies</h2>' +
-        '<div class="skills-grid">' +
-        skillsHTML +
-        '</div>' +
-        '</div>' +
-        '<div class="scroll-hint">' +
-        '<div class="scroll-arrows">' +
-        '<span></span>' +
-        '<span></span>' +
-        '</div>' +
-        '</div>' +
-        '</section>' +
-
-        '<!-- Company Section -->' +
-        '<section class="snap-section company" id="company">' +
-        '<div class="container">' +
-        '<div class="company-card reveal">' +
-        '<h2 class="company-logo">Invisib</h2>' +
-        '<p class="company-tagline">Privacy Without Compromise</p>' +
-        '<p class="company-description">' +
-        'At <strong>Invisib</strong>, we believe privacy is a fundamental right, not a luxury. ' +
-        'We build tools that let you do everyday things — browse, communicate, store files — ' +
-        'without leaving a trace. Our mission is simple: empower users to take control of ' +
-        'their digital lives while keeping things seamless and easy to use.' +
-        '</p>' +
-        '<div class="privacy-features">' +
-        '<div class="privacy-feature reveal reveal-delay-1">' +
-        '<div class="privacy-feature-icon">🔒</div>' +
-        '<h4 class="privacy-feature-title">End-to-End Encryption</h4>' +
-        '<p class="privacy-feature-text">Your data stays yours. Always encrypted, never compromised.</p>' +
-        '</div>' +
-        '<div class="privacy-feature reveal reveal-delay-2">' +
-        '<div class="privacy-feature-icon">👁️‍🗨️</div>' +
-        '<h4 class="privacy-feature-title">Zero Tracking</h4>' +
-        '<p class="privacy-feature-text">No analytics, no cookies, no surveillance. Period.</p>' +
-        '</div>' +
-        '<div class="privacy-feature reveal reveal-delay-3">' +
-        '<div class="privacy-feature-icon">🌍</div>' +
-        '<h4 class="privacy-feature-title">Open & Transparent</h4>' +
-        '<p class="privacy-feature-text">Built with trust in mind. See our code, verify our claims.</p>' +
-        '</div>' +
-        '</div>' +
-        '</div>' +
-        '</div>' +
-        '<div class="scroll-hint">' +
-        '<div class="scroll-arrows">' +
-        '<span></span>' +
-        '<span></span>' +
-        '</div>' +
-        '</div>' +
-        '</section>' +
-
-        '<!-- Projects Section -->' +
-        '<section class="snap-section projects" id="projects">' +
-        '<div class="container">' +
-        '<h2 class="section-title reveal">Featured <span>Projects</span></h2>' +
-        '<div class="projects-grid">' +
-        projectsHTML +
-        '</div>' +
-        '</div>' +
-        '</section>' +
-
-        '<!-- Footer -->' +
-        '<footer class="footer-section">' +
-        '<p class="reveal">Built with ❤️ by <a href="https://github.com/adondada">Adon Dada</a></p>' +
-        '</footer>' +
-        '</main>';
+      <footer>
+        <p>Built without a framework because this page absolutely did not need one.</p>
+        <div>
+          <a href="https://github.com/adondada" target="_blank" rel="noreferrer">GitHub</a>
+          <a href="#top">back to top ↑</a>
+        </div>
+      </footer>
+    </main>
+  `;
 }
