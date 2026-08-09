@@ -37,6 +37,36 @@ const featuredProjects = [
   }
 ];
 
+const socialLinks = [
+  { label: "Instagram", handle: "@ad0nd4da", url: "https://instagram.com/ad0nd4da" },
+  { label: "X", handle: "@ad0ndada", url: "https://x.com/ad0ndada" },
+  { label: "TikTok", handle: "@alternativehacker", url: "https://www.tiktok.com/@alternativehacker" },
+  { label: "GitHub", handle: "@adondada", url: "https://github.com/adondada" }
+];
+
+const knowledgeGroups = [
+  {
+    title: "Programming",
+    text: "Python and JavaScript are the languages I’m most comfortable in. I also work with TypeScript, C, SQL, HTML/CSS and Verilog when a project or university work calls for it.",
+    items: ["Python", "JavaScript", "TypeScript", "C", "SQL", "HTML/CSS", "Verilog"]
+  },
+  {
+    title: "Systems & infra",
+    text: "I spend a lot of time in Linux and around the boring-but-important pieces that make software actually run somewhere other than localhost.",
+    items: ["Linux", "Git/GitHub", "Node.js", "Express", "SSH", "PM2", "Docker", "Tailscale", "Cloudflare Tunnel", "MongoDB"]
+  },
+  {
+    title: "Networking & hardware",
+    text: "Networking is one of the areas I keep digging deeper into, from the normal TCP/IP side to Wi-Fi, BLE and small hardware projects.",
+    items: ["TCP/IP", "Routing basics", "Wi-Fi", "BLE", "Raspberry Pi", "Flipper Zero", "Pwnagotchi", "e-ink", "CCNA study"]
+  },
+  {
+    title: "Things I’m learning deeper",
+    text: "Cybersecurity, reverse engineering, low-level systems, DevOps and AI tooling are the rabbit holes I keep coming back to.",
+    items: ["Cybersecurity", "Reverse engineering", "Low-level systems", "DevOps", "AI tooling"]
+  }
+];
+
 const fallbackRepos = [
   ["pwnagotchi-store", "HTML", true],
   ["pwnagotchi-flipper-companion", "C", false],
@@ -83,14 +113,37 @@ function featuredProjectCards() {
   `).join("");
 }
 
+function socialLinkRows() {
+  return socialLinks.map(social => `
+    <a href="${social.url}" target="_blank" rel="noreferrer">
+      <span>${social.label}</span>
+      <strong>${social.handle}</strong>
+      <i>↗</i>
+    </a>
+  `).join("");
+}
+
+function knowledgeCards() {
+  return knowledgeGroups.map(group => `
+    <article class="knowledge-card">
+      <h3>${group.title}</h3>
+      <p>${group.text}</p>
+      <div class="tool-row compact">
+        ${group.items.map(item => `<span>${item}</span>`).join("")}
+      </div>
+    </article>
+  `).join("");
+}
+
 function Profile() {
   return `
     <header class="site-header" id="site-header">
       <a class="wordmark" href="#top">adondada</a>
       <nav aria-label="Primary navigation">
         <a href="#work">work</a>
-        <a href="#about">about</a>
-        <a href="#all-projects">all repos</a>
+        <a href="#invisib">invisib</a>
+        <a href="#knowledge">knowledge</a>
+        <a href="#socials">socials</a>
         <a href="https://github.com/adondada" target="_blank" rel="noreferrer">github ↗</a>
       </nav>
     </header>
@@ -100,14 +153,17 @@ function Profile() {
         <p class="eyebrow">developer · builder · occasional hardware menace</p>
         <h1>I make software for problems I keep running into.</h1>
         <p class="hero-copy">
-          I’m <strong>adondada</strong>. Most of my repos start the same way: I need a tool,
-          the existing option annoys me, and suddenly it is 3 a.m. and there is a new project.
+          I’m <strong>adondada</strong>. I study Electrical & Computer Engineering and spend most of my free time
+          bouncing between software, networking, Linux, AI and small hardware projects.
         </p>
         <div class="hero-links">
           <a class="button primary" href="#work">see what I build</a>
-          <a class="button" href="https://github.com/adondada" target="_blank" rel="noreferrer">github profile ↗</a>
+          <a class="button" href="https://invisib.app" target="_blank" rel="noreferrer">invisib.app ↗</a>
         </div>
-        <p class="tiny-note">No skill bars. I refuse to claim I’m 87% JavaScript.</p>
+        <div class="social-strip" aria-label="Social profiles">
+          ${socialLinks.map(social => `<a href="${social.url}" target="_blank" rel="noreferrer">${social.label} <span>${social.handle}</span></a>`).join("")}
+        </div>
+        <p class="tiny-note">No skill bars. I still refuse to claim I’m 87% JavaScript.</p>
       </section>
 
       <section class="section" id="work">
@@ -116,10 +172,45 @@ function Profile() {
             <p class="eyebrow">selected work</p>
             <h2>Things I’m actually excited to show.</h2>
           </div>
-          <p>Mostly developer tools, Pwnagotchi experiments, small utilities and whatever rabbit hole won that week.</p>
+          <p>Developer tools, Pwnagotchi experiments, networking stuff and utilities that mostly started because I wanted the tool to exist.</p>
         </div>
         <div class="featured-grid">
           ${featuredProjectCards()}
+        </div>
+      </section>
+
+      <section class="section" id="invisib">
+        <div class="invisib-card">
+          <div class="invisib-copy">
+            <p class="eyebrow">building now · invisib</p>
+            <h2>Not a chatbot. A workspace.</h2>
+            <p>
+              Invisib is the AI workspace I’m building for project management and execution. The idea is to keep research,
+              project context and actual work in one place instead of opening another disposable chat every five minutes.
+            </p>
+            <div class="hero-links">
+              <a class="button primary" href="https://invisib.app" target="_blank" rel="noreferrer">open invisib.app ↗</a>
+              <a class="button" href="https://github.com/adondada/invisib" target="_blank" rel="noreferrer">public repo ↗</a>
+              <a class="button" href="https://github.com/adondada/invisib.chat.github.io" target="_blank" rel="noreferrer">early web repo ↗</a>
+            </div>
+          </div>
+          <div class="invisib-grid">
+            <div>
+              <span>01</span>
+              <h3>Quick Search</h3>
+              <p>Real-time web search with AI synthesis instead of ten tabs and a prayer.</p>
+            </div>
+            <div>
+              <span>02</span>
+              <h3>Project Mode</h3>
+              <p>Keep work grouped around projects so the context survives longer than one conversation.</p>
+            </div>
+            <div>
+              <span>03</span>
+              <h3>Agents</h3>
+              <p>Run work in the background and keep execution visible inside the workspace.</p>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -132,17 +223,26 @@ function Profile() {
         </div>
         <div class="about-grid">
           <p>
-            I bounce between Python, JavaScript/TypeScript, C, Linux, networking and little hardware projects.
-            I care about understanding how things work underneath the UI, then making the annoying parts easier to use.
+            I like understanding what is happening underneath the UI, then making the annoying parts easier to use.
+            That has somehow led to remote Linux tooling, Pwnagotchi plugins, Flipper Zero work, networking projects and an AI workspace.
           </p>
           <p>
-            Some projects are polished, some are experiments, and some are evidence that curiosity has poor time-management skills.
-            The public repos below are the honest version, not a fake “only my three perfect projects exist” portfolio.
+            Some projects are polished, some are experiments, and some are evidence that curiosity has terrible time-management skills.
+            I’d rather show the trail than pretend every repository emerged from a tasteful startup incubator fully formed.
           </p>
         </div>
-        <div class="tool-row" aria-label="Tools and technologies">
-          <span>Python</span><span>JavaScript</span><span>TypeScript</span><span>C</span><span>Linux</span>
-          <span>Git</span><span>Networking</span><span>Raspberry Pi</span><span>Flipper Zero</span>
+      </section>
+
+      <section class="section" id="knowledge">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">what I know / work with</p>
+            <h2>The actual stack, without fake percentages.</h2>
+          </div>
+          <p>I’m not claiming expert status on every chip below. These are the languages, systems and areas I actually use, study or build with.</p>
+        </div>
+        <div class="knowledge-grid">
+          ${knowledgeCards()}
         </div>
       </section>
 
@@ -157,11 +257,27 @@ function Profile() {
         <div class="repo-list" id="repo-list" aria-live="polite"></div>
       </section>
 
+      <section class="section" id="socials">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">elsewhere</p>
+            <h2>Find me outside this tab.</h2>
+          </div>
+          <p>Same person, different algorithm trying to decide whether anyone should see the post.</p>
+        </div>
+        <div class="social-grid">
+          ${socialLinkRows()}
+        </div>
+      </section>
+
       <footer>
         <p>Built without a framework because this page absolutely did not need one.</p>
         <div>
+          <a href="https://instagram.com/ad0nd4da" target="_blank" rel="noreferrer">Instagram</a>
+          <a href="https://x.com/ad0ndada" target="_blank" rel="noreferrer">X</a>
+          <a href="https://www.tiktok.com/@alternativehacker" target="_blank" rel="noreferrer">TikTok</a>
           <a href="https://github.com/adondada" target="_blank" rel="noreferrer">GitHub</a>
-          <a href="#top">back to top ↑</a>
+          <a href="#top">↑</a>
         </div>
       </footer>
     </main>
