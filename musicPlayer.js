@@ -6,6 +6,16 @@ const portfolioTrack = {
 };
 
 let musicPlayerReady = false;
+let siteAudioContext = null;
+
+function iconMarkup(name) {
+  const icons = {
+    play: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10-6.5-10-6.5Z"/></svg>',
+    pause: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3v14H7V5Zm7 0h3v14h-3V5Z"/></svg>'
+  };
+
+  return icons[name] || icons.play;
+}
 
 function mountMusicPlayer() {
   const root = document.getElementById("root");
@@ -13,56 +23,87 @@ function mountMusicPlayer() {
 
   root.insertAdjacentHTML("beforeend", `
     <aside class="music-player" id="music-player" aria-label="Music player">
-      <audio id="audio-player" src="${portfolioTrack.file}" preload="metadata"></audio>
-      <div class="player-card">
-        <div class="player-cover" aria-hidden="true">
-          <img src="${portfolioTrack.cover}" alt="" loading="eager">
-          <span class="player-vinyl"></span>
-        </div>
+      <audio id="audio-player" src="${portfolioTrack.file}" preload="auto" playsinline></audio>
 
-        <div class="player-content">
-          <div class="player-topline">
+      <div class="player-card">
+        <img class="player-cover" src="${portfolioTrack.cover}" alt="${portfolioTrack.title} cover">
+
+        <div class="player-main">
+          <div class="player-meta-row">
             <div class="player-copy">
-              <strong class="player-title">${portfolioTrack.title}</strong>
+              <div class="player-title-row">
+                <strong class="player-title">${portfolioTrack.title}</strong>
+                <span class="player-eq" aria-hidden="true">
+                  <i></i><i></i><i></i>
+                </span>
+              </div>
               <span class="player-artist">${portfolioTrack.artist}</span>
             </div>
 
-            <div class="player-actions">
-              <button class="player-icon-btn player-play" id="play-btn" type="button" aria-label="Play ${portfolioTrack.title}">
-                <span id="play-symbol" aria-hidden="true">▶</span>
-              </button>
-              <button class="player-icon-btn player-collapse" id="player-collapse" type="button" aria-label="Minimize music player" aria-expanded="true">
-                <span aria-hidden="true">⌄</span>
-              </button>
-            </div>
-          </div>
-
-          <div class="player-timeline">
-            <span id="current-time">0:00</span>
-            <input id="progress-slider" class="player-slider player-progress-slider" type="range" min="0" max="1000" value="0" step="1" aria-label="Song position">
-            <span id="duration-time">--:--</span>
-          </div>
-
-          <div class="player-volume-row">
-            <button class="player-mute" id="mute-btn" type="button" aria-label="Mute audio">
-              <span id="mute-symbol" aria-hidden="true">◖))</span>
+            <button class="player-play" id="play-btn" type="button" aria-label="Play ${portfolioTrack.title}">
+              <span id="play-symbol">${iconMarkup("play")}</span>
             </button>
-            <input id="volume-slider" class="player-slider player-volume-slider" type="range" min="0" max="1" value="0.85" step="0.01" aria-label="Volume">
-            <span class="player-note">site soundtrack</span>
+          </div>
+
+          <div class="player-progress-row">
+            <span class="player-time" id="current-time">0:00</span>
+            <input
+              id="progress-slider"
+              class="player-progress"
+              type="range"
+              min="0"
+              max="1000"
+              value="0"
+              step="1"
+              aria-label="Song position"
+            >
+            <span class="player-time player-duration" id="duration-time">--:--</span>
           </div>
         </div>
       </div>
     </aside>
   `);
+
+  const audio = document.getElementById("audio-player");
+  if (audio) {
+    audio.volume = 1;
+    audio.muted = false;
+    audio.defaultMuted = false;
+  }
+}
+
+function unlockSiteAudio() {
+  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+
+  if (AudioContextClass) {
+    try {
+      if (!siteAudioContext) siteAudioContext = new AudioContextClass();
+      if (siteAudioContext.state === "suspended") siteAudioContext.resume().catch(() => {});
+    } catch (_) {
+      // HTMLMediaElement playback below is the part the soundtrack actually needs.
+    }
+  }
 }
 
 function attemptMusicAutoplayFromGesture() {
   const audio = document.getElementById("audio-player");
-  if (!audio || !audio.paused) return;
+  if (!audio) return;
 
-  audio.play().catch(() => {
-    // Browser blocked autoplay. The visible play button remains available.
-  });
+  unlockSiteAudio();
+
+  // Called synchronously from the ./launch.sh click handler. Keeping play()
+  // inside that exact gesture is what makes Safari/Chrome allow sound.
+  audio.muted = false;
+  audio.defaultMuted = false;
+  audio.volume = 1;
+  audio.removeAttribute("muted");
+
+  const playPromise = audio.play();
+  if (playPromise && typeof playPromise.catch === "function") {
+    playPromise.catch(error => {
+      console.warn("Launch-click audio start was blocked:", error);
+    });
+  }
 }
 
 function initMusicPlayer() {
@@ -72,30 +113,18 @@ function initMusicPlayer() {
   const audio = document.getElementById("audio-player");
   const playBtn = document.getElementById("play-btn");
   const playSymbol = document.getElementById("play-symbol");
-  const collapseBtn = document.getElementById("player-collapse");
   const progress = document.getElementById("progress-slider");
   const currentTime = document.getElementById("current-time");
   const durationTime = document.getElementById("duration-time");
-  const muteBtn = document.getElementById("mute-btn");
-  const muteSymbol = document.getElementById("mute-symbol");
-  const volume = document.getElementById("volume-slider");
 
-  if (!player || !audio || !playBtn || !progress) return;
+  if (!player || !audio || !playBtn || !playSymbol || !progress || !currentTime || !durationTime) return;
   musicPlayerReady = true;
 
-  const savedVolume = Number(localStorage.getItem("adondada-music-volume"));
-  if (Number.isFinite(savedVolume) && savedVolume >= 0 && savedVolume <= 1) {
-    audio.volume = savedVolume;
-    volume.value = String(savedVolume);
-  } else {
-    audio.volume = 0.85;
-  }
-
-  if (localStorage.getItem("adondada-player-collapsed") === "1") {
-    player.classList.add("is-collapsed");
-    collapseBtn.setAttribute("aria-expanded", "false");
-    collapseBtn.setAttribute("aria-label", "Expand music player");
-  }
+  // The soundtrack always starts at full element volume after launch.
+  // Device/system volume is still controlled by the visitor, as browsers require.
+  audio.volume = 1;
+  audio.muted = false;
+  audio.defaultMuted = false;
 
   const formatTime = seconds => {
     if (!Number.isFinite(seconds) || seconds < 0) return "--:--";
@@ -104,15 +133,15 @@ function initMusicPlayer() {
     return `${minutes}:${String(whole % 60).padStart(2, "0")}`;
   };
 
-  const paintSlider = (element, fraction) => {
-    const safe = Math.max(0, Math.min(1, fraction || 0));
-    element.style.setProperty("--slider-fill", `${safe * 100}%`);
+  const paintProgress = fraction => {
+    const safe = Math.max(0, Math.min(1, Number(fraction) || 0));
+    progress.style.setProperty("--player-progress", `${safe * 100}%`);
   };
 
   const syncPlaybackUI = () => {
     const playing = !audio.paused && !audio.ended;
     player.classList.toggle("is-playing", playing);
-    playSymbol.textContent = playing ? "Ⅱ" : "▶";
+    playSymbol.innerHTML = iconMarkup(playing ? "pause" : "play");
     playBtn.setAttribute("aria-label", `${playing ? "Pause" : "Play"} ${portfolioTrack.title}`);
 
     if ("mediaSession" in navigator) {
@@ -120,23 +149,23 @@ function initMusicPlayer() {
     }
   };
 
-  const syncMuteUI = () => {
-    const muted = audio.muted || audio.volume === 0;
-    muteSymbol.textContent = muted ? "×" : audio.volume < 0.45 ? ")" : "◖))";
-    muteBtn.setAttribute("aria-label", muted ? "Unmute audio" : "Mute audio");
-    paintSlider(volume, Number(volume.value));
-  };
-
   const syncTimeline = () => {
-    if (!audio.duration || progress.matches(":active")) return;
-    const fraction = audio.currentTime / audio.duration;
-    progress.value = String(Math.round(fraction * 1000));
-    paintSlider(progress, fraction);
+    const duration = audio.duration;
+    const fraction = duration ? audio.currentTime / duration : 0;
+
+    if (!progress.matches(":active")) {
+      progress.value = String(Math.round(fraction * 1000));
+      paintProgress(fraction);
+    }
+
     currentTime.textContent = formatTime(audio.currentTime);
-    durationTime.textContent = formatTime(audio.duration);
+    durationTime.textContent = formatTime(duration);
   };
 
   playBtn.addEventListener("click", () => {
+    audio.muted = false;
+    audio.volume = 1;
+
     if (audio.paused) {
       audio.play().catch(() => {});
     } else {
@@ -144,34 +173,17 @@ function initMusicPlayer() {
     }
   });
 
-  collapseBtn.addEventListener("click", () => {
-    const collapsed = player.classList.toggle("is-collapsed");
-    collapseBtn.setAttribute("aria-expanded", String(!collapsed));
-    collapseBtn.setAttribute("aria-label", collapsed ? "Expand music player" : "Minimize music player");
-    localStorage.setItem("adondada-player-collapsed", collapsed ? "1" : "0");
-  });
-
   progress.addEventListener("input", () => {
     const fraction = Number(progress.value) / 1000;
-    paintSlider(progress, fraction);
+    paintProgress(fraction);
     if (audio.duration) currentTime.textContent = formatTime(audio.duration * fraction);
   });
 
   progress.addEventListener("change", () => {
-    if (audio.duration) audio.currentTime = audio.duration * (Number(progress.value) / 1000);
-  });
-
-  muteBtn.addEventListener("click", () => {
-    audio.muted = !audio.muted;
-    syncMuteUI();
-  });
-
-  volume.addEventListener("input", () => {
-    const value = Number(volume.value);
-    audio.volume = value;
-    audio.muted = false;
-    localStorage.setItem("adondada-music-volume", String(value));
-    syncMuteUI();
+    if (audio.duration) {
+      audio.currentTime = audio.duration * (Number(progress.value) / 1000);
+      syncTimeline();
+    }
   });
 
   audio.addEventListener("play", syncPlaybackUI);
@@ -180,7 +192,6 @@ function initMusicPlayer() {
   audio.addEventListener("timeupdate", syncTimeline);
   audio.addEventListener("loadedmetadata", syncTimeline);
   audio.addEventListener("durationchange", syncTimeline);
-  audio.addEventListener("volumechange", syncMuteUI);
 
   if ("mediaSession" in navigator && "MediaMetadata" in window) {
     navigator.mediaSession.metadata = new MediaMetadata({
@@ -188,12 +199,16 @@ function initMusicPlayer() {
       artist: portfolioTrack.artist,
       album: "adondada.com",
       artwork: [
-        { src: portfolioTrack.cover, sizes: "512x512", type: "image/jpeg" }
+        { src: portfolioTrack.cover, type: "image/jpeg" }
       ]
     });
 
     const handlers = {
-      play: () => audio.play(),
+      play: () => {
+        audio.muted = false;
+        audio.volume = 1;
+        return audio.play();
+      },
       pause: () => audio.pause(),
       seekbackward: details => {
         audio.currentTime = Math.max(0, audio.currentTime - (details.seekOffset || 10));
@@ -210,14 +225,13 @@ function initMusicPlayer() {
       try {
         navigator.mediaSession.setActionHandler(action, handler);
       } catch (_) {
-        // Some browsers expose Media Session but not every action.
+        // Some browsers expose Media Session without every optional action.
       }
     });
   }
 
-  paintSlider(progress, 0);
-  paintSlider(volume, audio.volume);
+  paintProgress(0);
+  syncTimeline();
   syncPlaybackUI();
-  syncMuteUI();
-  setTimeout(() => player.classList.add("is-visible"), 180);
+  requestAnimationFrame(() => player.classList.add("is-visible"));
 }
