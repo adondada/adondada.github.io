@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
   const root = document.getElementById("root");
   root.innerHTML = DebugConsole() + Profile();
+  mountMusicPlayer();
 
   const terminal = document.getElementById("terminal-overlay");
   const terminalBody = document.getElementById("terminal-body");
@@ -70,6 +71,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function runLaunchSequence() {
+    // The launch click is a real user gesture, so this gives mobile Safari the
+    // best chance of allowing the site soundtrack to start automatically.
+    attemptMusicAutoplayFromGesture();
+
     launchButton.classList.remove("visible");
     clickHint.classList.remove("visible");
 
@@ -98,6 +103,7 @@ function initPortfolio() {
   renderRepos(fallbackRepos);
   refreshRepos();
   watchHeader();
+  initMusicPlayer();
 }
 
 function watchHeader() {
