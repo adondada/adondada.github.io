@@ -7,7 +7,7 @@
 (async()=>{
   try{
     let s=await (await fetch('./app-source.html?v=2',{cache:'no-store'})).text();
-    s=s.replace("device=await navigator.bluetooth.requestDevice({filters:[{services:[SERVICE]}]});","device=await navigator.bluetooth.requestDevice({acceptAllDevices:true,optionalServices:[SERVICE]});");
+    s=s.replace("device=await navigator.bluetooth.requestDevice({filters:[{services:[SERVICE]}]});","device=await navigator.bluetooth.requestDevice({filters:[{namePrefix:'Pwnagotchi'}],optionalServices:[SERVICE]});");
     s=s.replace("$('#connectBtn').onclick=()=>connect().catch(e=>{setConn(false,'Failed');alert(e.message)});","$('#connectBtn').onclick=()=>connect().catch(e=>{const msg=(e&&e.message)||(e&&e.name)||(typeof e==='string'?e:JSON.stringify(e))||'Unknown Web Bluetooth error';console.error('BLE connect failed',e);setConn(false,'Failed');alert('BLE connection failed: '+msg)});");
     document.open();document.write(s);document.close();
   }catch(e){document.body.textContent='Failed to load BLE client: '+((e&&e.message)||String(e));}
