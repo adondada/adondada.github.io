@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b0d10">
+<title>Pwnagotchi BLE Control</title>
+<style>
+:root{color-scheme:dark;--bg:#0b0d10;--panel:#12161b;--panel2:#171c22;--line:#29313a;--text:#f2f5f7;--muted:#96a0aa;--accent:#75f29a;--warn:#ffd166;--danger:#ff6b6b;--radius:16px;--shadow:0 14px 36px rgba(0,0,0,.28)}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--text);font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace}body{min-height:100vh;padding-bottom:max(24px,env(safe-area-inset-bottom))}button,input,textarea,select{font:inherit}.app{max-width:1040px;margin:auto;padding:18px}.top{display:flex;gap:14px;align-items:center;justify-content:space-between;margin:8px 0 18px}.brand h1{font-size:22px;margin:0}.brand p{margin:4px 0 0;color:var(--muted);font-size:12px}.connection{display:flex;align-items:center;gap:9px}.dot{width:10px;height:10px;border-radius:50%;background:#59616a;box-shadow:0 0 0 4px rgba(255,255,255,.03)}.dot.on{background:var(--accent);box-shadow:0 0 0 4px rgba(117,242,154,.12)}.btn{border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:10px 13px;border-radius:11px;cursor:pointer}.btn:hover{border-color:#47515c}.btn.primary{background:var(--accent);border-color:var(--accent);color:#07120a;font-weight:800}.btn.danger{border-color:#6a3131;color:#ffaaaa}.btn.warn{border-color:#6b592b;color:#ffe39a}.btn.small{padding:7px 9px;font-size:12px}.tabs{display:flex;overflow:auto;gap:6px;padding:5px;background:#0f1216;border:1px solid var(--line);border-radius:14px;margin-bottom:15px}.tab{white-space:nowrap;border:0;background:transparent;color:var(--muted);padding:9px 13px;border-radius:10px}.tab.active{background:var(--panel2);color:var(--text)}.view{display:none}.view.active{display:block}.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:14px;box-shadow:var(--shadow)}.card h2,.card h3{margin:0 0 12px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.metric{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px}.metric .k{font-size:11px;color:var(--muted);margin-bottom:7px}.metric .v{font-size:15px;word-break:break-word}.good{color:var(--accent)}.bad{color:var(--danger)}.warntext{color:var(--warn)}.row{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.row.stretch>*:first-child{flex:1}.field{width:100%;background:#0d1014;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px}.field:focus{outline:1px solid var(--accent);border-color:var(--accent)}.muted{color:var(--muted);font-size:12px}.notice{padding:11px 12px;border-radius:10px;border:1px solid #4f4324;background:#1d1a11;color:#ffdf8a;font-size:12px;line-height:1.45}.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}.toolbar .search{flex:1;min-width:190px}.config-list{display:grid;gap:8px}.config-row{display:grid;grid-template-columns:minmax(190px,1fr) minmax(220px,1.4fr) auto;gap:10px;align-items:center;padding:10px;background:var(--panel2);border:1px solid var(--line);border-radius:11px}.config-row.changed{border-color:#657038}.config-row.deleted{opacity:.55;border-color:#6a3131}.path{font-size:12px;word-break:break-word}.badge{font-size:10px;border:1px solid var(--line);border-radius:999px;padding:3px 6px;color:var(--muted);margin-left:5px}.valuebox input,.valuebox textarea{width:100%;background:#0d1014;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:8px}.valuebox textarea{min-height:64px;resize:vertical}.switch{display:flex;align-items:center;gap:8px}.switch input{width:20px;height:20px}.plugin{padding:12px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;margin-bottom:8px}.plugin-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.plugin pre{white-space:pre-wrap;word-break:break-word;color:#c7d0d7;font-size:11px}.terminal{background:#07090b;border:1px solid #262c33;border-radius:12px;padding:12px;min-height:250px;max-height:58vh;overflow:auto;white-space:pre-wrap;word-break:break-word;font-size:12px;line-height:1.45}.chips{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}.chip{font-size:11px;padding:7px 9px;border-radius:999px;border:1px solid var(--line);background:#101419;color:#cfd5da}.footer{color:#69737d;text-align:center;font-size:11px;margin:20px 0}.spinner{display:inline-block;width:12px;height:12px;border:2px solid #43505c;border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:760px){.app{padding:12px}.top{align-items:flex-start}.brand p{max-width:220px}.grid{grid-template-columns:1fr 1fr}.config-row{grid-template-columns:1fr}.config-row .actions{justify-self:start}.btn{padding:10px 11px}}
+@media(max-width:460px){.grid{grid-template-columns:1fr}.brand h1{font-size:19px}.connection .label{display:none}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top">
+    <div class="brand"><h1>(⌐■_■) BLE Control</h1><p>Pwnagotchi WebCFG without PAN, IP, DHCP, or tethering.</p></div>
+    <div class="connection"><span id="dot" class="dot"></span><span id="connLabel" class="label muted">Disconnected</span><button id="connectBtn" class="btn primary">Connect BLE</button></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" data-view="overview">Overview</button>
+    <button class="tab" data-view="config">WebCFG</button>
+    <button class="tab" data-view="plugins">Plugins</button>
+    <button class="tab" data-view="console">Commands</button>
+    <button class="tab" data-view="logs">Logs</button>
+  </div>
+
+  <section id="overview" class="view active">
+    <div class="card">
+      <h2>Connection</h2>
+      <div class="row stretch"><input id="token" class="field" type="password" autocomplete="off" placeholder="BLE token from install.sh"><button id="saveToken" class="btn">Save token</button></div>
+      <p class="muted">The token is stored only in this browser. BLE is the transport. No Bluetooth PAN network is created.</p>
+      <div id="bluefyWarning" class="notice" style="display:none">Web Bluetooth is unavailable here. On iPhone, open this page inside Bluefy rather than Safari.</div>
+    </div>
+    <div class="card">
+      <div class="row" style="justify-content:space-between"><h2>Device</h2><button id="refreshStatus" class="btn small">Refresh</button></div>
+      <div id="metrics" class="grid"><div class="metric"><div class="k">STATE</div><div class="v muted">Connect to load status</div></div></div>
+      <div id="tetherNotice" class="notice" style="display:none;margin-top:12px">bt-tether is still enabled. BLE works anyway, but disable <b>main.plugins.bt-tether.enabled</b> in WebCFG for a truly PAN-free setup.</div>
+    </div>
+    <div class="card">
+      <h2>Quick actions</h2>
+      <div class="row"><button class="btn" data-command="systemctl restart pwnagotchi">Restart Pwnagotchi</button><button class="btn" data-command="systemctl status pwnagotchi">Service status</button><button id="debugBtn" class="btn">Debug snapshot</button><button id="restartBt" class="btn warn">Restart Bluetooth</button></div>
+    </div>
+  </section>
+
+  <section id="config" class="view">
+    <div class="card">
+      <div class="toolbar"><input id="cfgSearch" class="field search" placeholder="Search config path…"><button id="loadConfig" class="btn">Reload</button><button id="saveConfig" class="btn primary">Save changes</button></div>
+      <div class="row" style="margin-bottom:12px"><label class="switch"><input id="restartAfterSave" type="checkbox" checked> Restart Pwnagotchi after save</label><span id="changeCount" class="muted">0 pending changes</span></div>
+      <div class="notice" style="margin-bottom:12px">Edits create user overrides in <b>/etc/pwnagotchi/config.toml</b>. “Remove override” falls back to the release/default value. The Pi backs up and validates the config before restarting.</div>
+      <div id="configList" class="config-list"><div class="muted">Connect, then load WebCFG.</div></div>
+    </div>
+    <div class="card"><h3>Add option</h3><div class="row"><input id="newPath" class="field" style="flex:2" placeholder="main.plugins.example.enabled"><input id="newValue" class="field" style="flex:1" placeholder='true, 42, [1,6,11], or text'><button id="addOption" class="btn">Stage option</button></div></div>
+  </section>
+
+  <section id="plugins" class="view">
+    <div class="card"><div class="row" style="justify-content:space-between"><h2>Plugins</h2><button id="loadPlugins" class="btn small">Reload</button></div><p class="muted">Configured plugin sections plus custom .py plugins found in the custom-plugin directory.</p><div id="pluginList"><div class="muted">Connect to load plugins.</div></div></div>
+  </section>
+
+  <section id="console" class="view">
+    <div class="card">
+      <h2>Command runner</h2>
+      <p class="muted">This is intentionally allowlisted, not an unauthenticated root shell over the air. Type a supported maintenance command or tap one below.</p>
+      <div class="chips">
+        <button class="chip" data-command="systemctl restart pwnagotchi">systemctl restart pwnagotchi</button>
+        <button class="chip" data-command="systemctl status pwnagotchi">systemctl status pwnagotchi</button>
+        <button class="chip" data-command="pwnagotchi --version">pwnagotchi --version</button>
+        <button class="chip" data-command="journalctl -u pwnagotchi -n 150 --no-pager">journalctl -u pwnagotchi -n 150 --no-pager</button>
+        <button class="chip" data-command="bluetoothctl show">bluetoothctl show</button>
+        <button class="chip" data-command="rfkill list bluetooth">rfkill list bluetooth</button>
+      </div>
+      <div class="row stretch"><input id="commandInput" class="field" placeholder="systemctl status pwnagotchi"><button id="runCommand" class="btn primary">Run</button></div>
+    </div>
+    <div class="card"><div class="row" style="justify-content:space-between"><h3>Output</h3><button id="clearTerminal" class="btn small">Clear</button></div><pre id="terminal" class="terminal">Ready.</pre></div>
+    <div class="card"><h3>Device power</h3><div class="row"><button id="rebootBtn" class="btn warn">Reboot Pi</button><button id="shutdownBtn" class="btn danger">Shutdown Pi</button></div></div>
+  </section>
+
+  <section id="logs" class="view">
+    <div class="card"><div class="row" style="justify-content:space-between"><h2>Pwnagotchi journal</h2><div class="row"><select id="logLines" class="field" style="width:auto"><option>50</option><option selected>150</option><option>300</option><option>500</option></select><button id="loadLogs" class="btn small">Refresh</button></div></div><pre id="logsOut" class="terminal">Connect to load logs.</pre></div>
+  </section>
+
+  <div class="footer">Static Web Bluetooth client · NUS-compatible BLE transport · protocol v1</div>
+</div>
+<script>
+const SERVICE='6e400001-b5a3-f393-e0a9-e50e24dcca9e';
+const RX='6e400002-b5a3-f393-e0a9-e50e24dcca9e';
+const TX='6e400003-b5a3-f393-e0a9-e50e24dcca9e';
+const CHUNK=20;
+let device=null,rx=null,tx=null,notifyBuf='',decoder=new TextDecoder(),reqSeq=0;
+const pending=new Map();
+let configEntries=[];
+let changes={set:{},delete:new Set()};
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function connected(){return !!(device?.gatt?.connected&&rx&&tx)}
+function setConn(on,label){$('#dot').classList.toggle('on',on);$('#connLabel').textContent=label|| (on?'Connected':'Disconnected');$('#connectBtn').textContent=on?'Disconnect':'Connect BLE'}
+function token(){return $('#token').value.trim()}
+function logTerminal(text,append=true){const el=$('#terminal');el.textContent=append?el.textContent+'\n'+text:text;el.scrollTop=el.scrollHeight}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
+function shortState(v){return v==='active'?'<span class="good">active</span>':`<span class="bad">${escapeHtml(v??'unknown')}</span>`}
+
+if(!navigator.bluetooth) $('#bluefyWarning').style.display='block';
+$('#token').value=localStorage.getItem('pwn_ble_token')||'';
+$('#saveToken').onclick=()=>{localStorage.setItem('pwn_ble_token',token()); alert('Token saved in this browser.');};
+
+async function connect(){
+  if(connected()){device.gatt.disconnect();return}
+  if(!navigator.bluetooth) throw new Error('Web Bluetooth unavailable. Use Bluefy on iPhone.');
+  device=await navigator.bluetooth.requestDevice({filters:[{services:[SERVICE]}]});
+  device.addEventListener('gattserverdisconnected',()=>{rx=tx=null;setConn(false,'Disconnected');});
+  setConn(false,'Connecting…');
+  const server=await device.gatt.connect();
+  const service=await server.getPrimaryService(SERVICE);
+  rx=await service.getCharacteristic(RX);
+  tx=await service.getCharacteristic(TX);
+  await tx.startNotifications();
+  tx.addEventListener('characteristicvaluechanged',onNotify);
+  setConn(true,device.name||'Connected');
+  await request('ping');
+  await refreshStatus();
+}
+$('#connectBtn').onclick=()=>connect().catch(e=>{setConn(false,'Failed');alert(e.message)});
+
+function onNotify(ev){
+  notifyBuf += decoder.decode(ev.target.value,{stream:true});
+  while(notifyBuf.includes('\n')){
+    const idx=notifyBuf.indexOf('\n');
+    const line=notifyBuf.slice(0,idx); notifyBuf=notifyBuf.slice(idx+1);
+    if(!line.trim()) continue;
+    try{
+      const msg=JSON.parse(line), p=pending.get(String(msg.id));
+      if(p){pending.delete(String(msg.id)); clearTimeout(p.timer); msg.ok?p.resolve(msg.result):p.reject(new Error(msg.error||'BLE request failed'));}
+    }catch(e){console.error('Bad BLE response',e,line)}
+  }
+}
+
+async function writeLine(obj){
+  if(!connected()) throw new Error('Not connected');
+  const bytes=new TextEncoder().encode(JSON.stringify(obj)+'\n');
+  for(let i=0;i<bytes.length;i+=CHUNK){
+    const part=bytes.slice(i,i+CHUNK);
+    try{
+      if(typeof rx.writeValueWithoutResponse==='function') await rx.writeValueWithoutResponse(part);
+      else if(typeof rx.writeValue==='function') await rx.writeValue(part);
+      else await rx.writeValueWithResponse(part);
+    }catch(firstErr){
+      if(typeof rx.writeValue==='function') await rx.writeValue(part);
+      else if(typeof rx.writeValueWithResponse==='function') await rx.writeValueWithResponse(part);
+      else throw firstErr;
+    }
+    await sleep(4);
+  }
+}
+function request(action,data={}){
+  const id=String(++reqSeq);
+  return new Promise(async(resolve,reject)=>{
+    const timer=setTimeout(()=>{pending.delete(id);reject(new Error('BLE request timed out'));},45000);
+    pending.set(id,{resolve,reject,timer});
+    try{await writeLine({id,token:token(),action,data})}catch(e){clearTimeout(timer);pending.delete(id);reject(e)}
+  });
+}
+
+async function refreshStatus(){
+  if(!connected()) return;
+  $('#metrics').innerHTML='<div class="metric"><div class="k">STATE</div><div class="v"><span class="spinner"></span> Loading</div></div>';
+  try{
+    const s=await request('status');
+    const metrics=[['HOST',s.hostname],['PWNAGOTCHI',shortState(s.pwnagotchi),true],['BLUETOOTH',shortState(s.bluetooth),true],['BLE SERVICE',shortState(s.ble_service),true],['VERSION',s.version],['CPU TEMP',s.temperature_c==null?'?':`${s.temperature_c} °C`],['UPTIME',fmtUptime(s.uptime_s)],['CONFIG',s.config]];
+    $('#metrics').innerHTML=metrics.map(([k,v,html])=>`<div class="metric"><div class="k">${k}</div><div class="v">${html?v:escapeHtml(v)}</div></div>`).join('');
+    $('#tetherNotice').style.display=s.bt_tether_enabled?'block':'none';
+  }catch(e){$('#metrics').innerHTML=`<div class="metric"><div class="k">ERROR</div><div class="v bad">${escapeHtml(e.message)}</div></div>`}
+}
+function fmtUptime(s){s=Number(s)||0;const d=Math.floor(s/86400),h=Math.floor((s%86400)/3600),m=Math.floor((s%3600)/60);return `${d}d ${h}h ${m}m`}
+$('#refreshStatus').onclick=()=>refreshStatus();
+
+async function loadConfig(){
+  if(!connected()) return alert('Connect first.');
+  $('#configList').innerHTML='<div class="muted"><span class="spinner"></span> Loading effective config…</div>';
+  configEntries=[]; let offset=0,total=1;
+  try{
+    while(offset<total){
+      const r=await request('config.list',{offset,limit:25});
+      configEntries.push(...r.entries); total=r.total; offset+=r.entries.length;
+      $('#configList').innerHTML=`<div class="muted"><span class="spinner"></span> Loaded ${configEntries.length}/${total} options…</div>`;
+      if(!r.more||!r.entries.length) break;
+    }
+    changes={set:{},delete:new Set()}; updateCount(); renderConfig();
+  }catch(e){$('#configList').innerHTML=`<div class="bad">${escapeHtml(e.message)}</div>`}
+}
+$('#loadConfig').onclick=loadConfig;
+$('#cfgSearch').oninput=renderConfig;
+
+function renderConfig(){
+  const q=$('#cfgSearch').value.trim().toLowerCase();
+  const list=configEntries.filter(e=>!q||e.path.toLowerCase().includes(q));
+  $('#configList').innerHTML=list.map(e=>configRow(e)).join('')||'<div class="muted">No matching options.</div>';
+  $$('.cfg-input').forEach(el=>{
+    const path=el.dataset.path, entry=configEntries.find(e=>e.path===path);
+    el.addEventListener('change',()=>stageValue(entry,el));
+  });
+  $$('.remove-override').forEach(b=>b.onclick=()=>{const path=b.dataset.path;changes.delete.add(path);delete changes.set[path];updateCount();renderConfig()});
+  $$('.undo-change').forEach(b=>b.onclick=()=>{const path=b.dataset.path;changes.delete.delete(path);delete changes.set[path];updateCount();renderConfig()});
+}
+function configRow(e){
+  const deleted=changes.delete.has(e.path), changed=Object.prototype.hasOwnProperty.call(changes.set,e.path);
+  let value=changed?changes.set[e.path]:e.value;
+  let editor='';
+  if(e.type==='bool') editor=`<label class="switch"><input class="cfg-input" data-path="${escapeHtml(e.path)}" type="checkbox" ${value?'checked':''}> <span>${value?'true':'false'}</span></label>`;
+  else if(e.type==='array'||e.type==='json') editor=`<textarea class="cfg-input" data-path="${escapeHtml(e.path)}">${escapeHtml(JSON.stringify(value))}</textarea>`;
+  else editor=`<input class="cfg-input" data-path="${escapeHtml(e.path)}" type="${e.type==='number'?'number':'text'}" value="${escapeHtml(value)}">`;
+  let action='';
+  if(deleted||changed) action=`<button class="btn small undo-change" data-path="${escapeHtml(e.path)}">Undo</button>`;
+  else if(e.overridden) action=`<button class="btn small danger remove-override" data-path="${escapeHtml(e.path)}">Remove override</button>`;
+  else action='<span class="muted">default</span>';
+  return `<div class="config-row ${changed?'changed':''} ${deleted?'deleted':''}"><div class="path">${escapeHtml(e.path)} ${e.overridden?'<span class="badge">override</span>':'<span class="badge">default</span>'}</div><div class="valuebox">${editor}</div><div class="actions row">${action}</div></div>`;
+}
+function stageValue(entry,el){
+  let v;
+  try{
+    if(entry.type==='bool') v=el.checked;
+    else if(entry.type==='number') v=el.value.includes('.')?Number.parseFloat(el.value):Number.parseInt(el.value,10);
+    else if(entry.type==='array'||entry.type==='json') v=JSON.parse(el.value);
+    else v=el.value;
+    changes.set[entry.path]=v; changes.delete.delete(entry.path); updateCount(); renderConfig();
+  }catch(e){alert('Invalid value: '+e.message);renderConfig()}
+}
+function updateCount(){const n=Object.keys(changes.set).length+changes.delete.size;$('#changeCount').textContent=`${n} pending change${n===1?'':'s'}`}
+$('#addOption').onclick=()=>{
+  const path=$('#newPath').value.trim();if(!path)return;
+  let raw=$('#newValue').value.trim(),v=raw;try{v=JSON.parse(raw)}catch{}
+  changes.set[path]=v;changes.delete.delete(path);updateCount();
+  if(!configEntries.some(e=>e.path===path))configEntries.unshift({path,value:v,type:Array.isArray(v)?'array':typeof v==='boolean'?'bool':typeof v==='number'?'number':typeof v==='string'?'string':'json',overridden:false});
+  $('#newPath').value='';$('#newValue').value='';renderConfig();
+};
+$('#saveConfig').onclick=async()=>{
+  const count=Object.keys(changes.set).length+changes.delete.size;if(!count)return alert('No staged changes.');
+  if(!confirm(`Save ${count} config change(s)?`))return;
+  const btn=$('#saveConfig'),old=btn.textContent;btn.disabled=true;btn.textContent='Saving…';
+  try{
+    const r=await request('config.patch',{set:changes.set,delete:[...changes.delete],restart:$('#restartAfterSave').checked});
+    alert(`Config saved and validated.${r.backup?'\nBackup: '+r.backup:''}`); await loadConfig(); await refreshStatus();
+  }catch(e){alert('Save failed: '+e.message)}finally{btn.disabled=false;btn.textContent=old}
+};
+
+async function loadPlugins(){
+  if(!connected())return alert('Connect first.');
+  $('#pluginList').innerHTML='<div class="muted"><span class="spinner"></span> Loading plugins…</div>';
+  try{
+    const r=await request('plugins.list');
+    $('#pluginList').innerHTML=r.plugins.map(p=>`<div class="plugin"><div class="plugin-head"><div><b>${escapeHtml(p.name)}</b>${p.custom?'<span class="badge">custom</span>':''}${p.configured?'<span class="badge">configured</span>':''}</div><span class="${p.enabled?'good':'muted'}">${p.enabled?'enabled':'disabled'}</span></div>${p.path?`<div class="muted">${escapeHtml(p.path)}</div>`:''}<pre>${escapeHtml(JSON.stringify(p.options,null,2))}</pre>${p.configured?`<button class="btn small plugin-toggle" data-name="${escapeHtml(p.name)}" data-enabled="${p.enabled}">${p.enabled?'Disable':'Enable'}</button>`:''}</div>`).join('')||'<div class="muted">No plugins found.</div>';
+    $$('.plugin-toggle').forEach(b=>b.onclick=async()=>{const name=b.dataset.name,newVal=b.dataset.enabled!=='true';try{await request('config.patch',{set:{[`main.plugins.${name}.enabled`]:newVal},delete:[],restart:true});await loadPlugins();await refreshStatus()}catch(e){alert(e.message)}});
+  }catch(e){$('#pluginList').innerHTML=`<div class="bad">${escapeHtml(e.message)}</div>`}
+}
+$('#loadPlugins').onclick=loadPlugins;
+
+async function runCommand(command){
+  if(!connected())return alert('Connect first.');
+  logTerminal(`\n$ ${command}`);
+  try{const r=await request('command',{command});logTerminal(r.output||`[exit ${r.rc}]`)}catch(e){logTerminal('ERROR: '+e.message)}
+}
+$('#runCommand').onclick=()=>runCommand($('#commandInput').value.trim());
+$('#commandInput').addEventListener('keydown',e=>{if(e.key==='Enter')runCommand(e.target.value.trim())});
+$$('[data-command]').forEach(b=>b.onclick=()=>{const c=b.dataset.command;$('#commandInput').value=c;runCommand(c)});
+$('#clearTerminal').onclick=()=>logTerminal('Ready.',false);
+$('#debugBtn').onclick=async()=>{if(!connected())return alert('Connect first.');logTerminal('\n$ debug snapshot');try{const r=await request('debug.snapshot');logTerminal(r.output)}catch(e){logTerminal('ERROR: '+e.message)}};
+$('#restartBt').onclick=async()=>{if(!confirm('Restart Bluetooth? The BLE connection will drop.'))return;try{await request('bluetooth.restart');}catch{}setTimeout(()=>device?.gatt?.disconnect(),500)};
+$('#rebootBtn').onclick=async()=>{if(confirm('Reboot the Pi now?')){try{await request('reboot')}catch{}setTimeout(()=>device?.gatt?.disconnect(),500)}};
+$('#shutdownBtn').onclick=async()=>{if(confirm('Power off the Pi now?')){try{await request('shutdown')}catch{}setTimeout(()=>device?.gatt?.disconnect(),500)}};
+
+async function loadLogs(){if(!connected())return alert('Connect first.');$('#logsOut').textContent='Loading…';try{const r=await request('logs',{lines:Number($('#logLines').value)});$('#logsOut').textContent=r.output||'';$('#logsOut').scrollTop=$('#logsOut').scrollHeight}catch(e){$('#logsOut').textContent='ERROR: '+e.message}}
+$('#loadLogs').onclick=loadLogs;
+
+$$('.tab').forEach(t=>t.onclick=()=>{$$('.tab').forEach(x=>x.classList.remove('active'));$$('.view').forEach(x=>x.classList.remove('active'));t.classList.add('active');$('#'+t.dataset.view).classList.add('active');if(t.dataset.view==='plugins'&&connected())loadPlugins();if(t.dataset.view==='logs'&&connected())loadLogs()});
+</script>
+</body>
+</html>
