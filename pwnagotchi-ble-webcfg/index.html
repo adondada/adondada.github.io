@@ -1,1 +1,15 @@
-<!doctype html><meta charset="utf-8"><title>Pwnagotchi BLE Control temporarily updating</title><p>Updating BLE client. Reload in a moment.</p>
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Pwnagotchi BLE Control</title>
+<body style="background:#0b0d10;color:#f2f5f7;font-family:monospace;padding:20px">Loading BLE client…</body>
+<script>
+(async()=>{
+  try{
+    let s=await (await fetch('./app-source.html?v=2',{cache:'no-store'})).text();
+    s=s.replace("device=await navigator.bluetooth.requestDevice({filters:[{services:[SERVICE]}]});","device=await navigator.bluetooth.requestDevice({acceptAllDevices:true,optionalServices:[SERVICE]});");
+    s=s.replace("$('#connectBtn').onclick=()=>connect().catch(e=>{setConn(false,'Failed');alert(e.message)});","$('#connectBtn').onclick=()=>connect().catch(e=>{const msg=(e&&e.message)||(e&&e.name)||(typeof e==='string'?e:JSON.stringify(e))||'Unknown Web Bluetooth error';console.error('BLE connect failed',e);setConn(false,'Failed');alert('BLE connection failed: '+msg)});");
+    document.open();document.write(s);document.close();
+  }catch(e){document.body.textContent='Failed to load BLE client: '+((e&&e.message)||String(e));}
+})();
+</script>
