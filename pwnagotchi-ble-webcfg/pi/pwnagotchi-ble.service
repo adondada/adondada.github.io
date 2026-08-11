@@ -1,0 +1,17 @@
+[Unit]
+Description=Pwnagotchi BLE WebCFG control service
+Documentation=https://github.com/adondada/adondada.github.io/tree/main/pwnagotchi-ble-webcfg
+After=bluetooth.service dbus.service
+Requires=bluetooth.service
+
+[Service]
+Type=simple
+User=root
+Group=root
+ExecStart=/usr/bin/python3 /usr/local/lib/pwnagotchi-ble/pwnagotchi_ble.py
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=10
+
+[Install]
+WantedBy=multi-user.target
